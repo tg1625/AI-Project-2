@@ -162,7 +162,7 @@ def getNeighbors(row, col):
       neighbors.append((rowi, col))
 
   for coli in range(width): #column
-    if(coli != col and (rowi, col) not in neighbors):
+    if(coli != col and (row, coli) not in neighbors):
       neighbors.append((row, coli))
     
   for rowi in range(row//3*3, row//3*3+3):  #square
@@ -260,6 +260,7 @@ def main():
       print("Incorrect filepath")
     else:
       #printOutput(root)
+      csp = None
       
       domains = [[[] for j in range(width)] for i in range(height)] #create data structure for domains. it is a 3d array also this was the only way to do it w/o pythons weird pointer system being weird
       assignment = [[0 for j in range(width)] for i in range(height)]
