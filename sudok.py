@@ -146,13 +146,14 @@ class Backtracking:
       return self.assignment
 
     currVar = self.selectUnassignedVariable() #get next unassigned variable
-    print(currVar[0], ",", currVar[1], end="\r", flush=True)
+    # print(currVar[0], ",", currVar[1], end="\r", flush=True)
+    print(currVar[0], ",", currVar[1])
     for val in self.domain[currVar[0]][currVar[1]]:#for each value in that domain; don't need to sort domain values as they are already sorted
       if(self.isConsistent(currVar[0], currVar[1], val)): #check current domain value for consistency w/ assignment
         self.assignment[currVar[0]][currVar[1]] = val #if consistent, assign variable
         self.findSolution() #result = backtrack(csp, assignment)
         if self.isComplete():
-          print("She complete tho")
+          # print("She complete tho")
           return self.assignment
         print("Backtracking \n")
         self.assignment[currVar[0]][currVar[1]] = 0
@@ -187,50 +188,52 @@ class Backtracking:
   def selectUnassignedVariable(self):#use minimum remaining value and then degree to find next node to try
     unassigned = self.getUnassignedVars() #first get a list of the unassigned variables
     MRVs = {} #minimum remaining vals of all unassinged vars
+    mrv = 100
     for row, col in unassigned:
       rv = len(self.domain[row][col])
       if rv in MRVs:
-        MRVs[rv].append((row, col))
+        if rv < mrv:
+          MRVs[rv].append((row, col))
       else:
         MRVs[rv] = [(row, col)]
         
-    mrv =  min(MRVs.keys())
+      mrv =  min(MRVs.keys()) #get MRV 
+    # print("Min is", mrv, "in", MRVs)
         
     if(len(MRVs[mrv]) == 1):  #return tuple coords of next var
       return MRVs[mrv][0]
     else: # if there is a tie, calculate degree
       unassigned2 = MRVs[mrv]
       degrees = {}
+      maxdeg = -1
       for row, col in unassigned2:
         deg = self.getDegree(row, col)
         if deg in degrees:
-          degrees[deg].append((row, col))
+          if maxdeg > deg:
+            degrees[deg].append((row, col))
         else:
           degrees[deg] = [(row, col)] 
-      maxdeg = max(degrees.keys())
-      
+        maxdeg = max(degrees.keys()) #get highest degree
+      # print("Max is", maxdeg, "so choosing", degrees[maxdeg][0], "from ", degrees)
       return degrees[maxdeg][0] #if there is yet another tie, just pick the first one idk
    
     
   def getUnassignedVars(self): #returns list of unassigned variables (for MRV heuristic)
     unassigned = []
-    
     for rowi in range(height):
       for colj in range(width):
         if(self.assignment[rowi][colj] == 0):
           unassigned.append((rowi, colj))
-
     return unassigned
     
 
   def getDegree(self, row, col): #returns # of unassigned neighbors (for degree heuristic)
     degree = 0
     neighbors = getConstrainingNeighbors(row, col)
-    
-    for row, col in neighbors:
-      if(self.assignment[row][col] == 0): #if neighbor unassigned, increase degree 
+    for (r, c) in neighbors:
+      if(self.assignment[r][c] == 0): #if neighbor unassigned, increase degree 
         degree += 1
-
+    # print("Degree of", row, ",", col, "is", degree, "for", neighbors)
     return degree
 
 
