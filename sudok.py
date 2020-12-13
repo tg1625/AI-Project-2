@@ -147,20 +147,15 @@ class Backtracking:
 
     currVar = self.selectUnassignedVariable() #get next unassigned variable
     # print(currVar[0], ",", currVar[1], end="\r", flush=True)
-    print(currVar[0], ",", currVar[1])
     for val in self.domain[currVar[0]][currVar[1]]:#for each value in that domain; don't need to sort domain values as they are already sorted
       if(self.isConsistent(currVar[0], currVar[1], val)): #check current domain value for consistency w/ assignment
         self.assignment[currVar[0]][currVar[1]] = val #if consistent, assign variable
         self.findSolution() #result = backtrack(csp, assignment)
         if self.isComplete():
-          # print("She complete tho")
           return self.assignment
-        print("Backtracking \n")
         self.assignment[currVar[0]][currVar[1]] = 0
         
-    # if(not self.isComplete()):
-    #   self.assignment[currVar[0]][currVar[1]] = 0  #remove var=value from assignment if there is a failure 
-
+    # print("Backtracking at", currVar[0], ",", currVar[1])
     return self.assignment
 
 
@@ -175,30 +170,27 @@ class Backtracking:
   def isComplete(self):   #check for completed assignment
     if(self.isSolved):
       return True
-      
     for rowi in range(height):
       for coli in range(width):
         if(self.assignment[rowi][coli] == 0): #if anything is unassigned, not complete 
-          return False
-             
+          return False         
     self.isSolved = True #else is complete 
     return True
   
 
-  def selectUnassignedVariable(self):#use minimum remaining value and then degree to find next node to try
+  def selectUnassignedVariable(self):#use minimum remaining value and then degree to find next cell to try
     unassigned = self.getUnassignedVars() #first get a list of the unassigned variables
     MRVs = {} #minimum remaining vals of all unassinged vars
     mrv = 100
     for row, col in unassigned:
       rv = len(self.domain[row][col])
       if rv in MRVs:
-        if rv < mrv:
+        if rv < mrv: #don't bother adding var if not in current mininum list
           MRVs[rv].append((row, col))
       else:
         MRVs[rv] = [(row, col)]
         
       mrv =  min(MRVs.keys()) #get MRV 
-    # print("Min is", mrv, "in", MRVs)
         
     if(len(MRVs[mrv]) == 1):  #return tuple coords of next var
       return MRVs[mrv][0]
@@ -209,12 +201,11 @@ class Backtracking:
       for row, col in unassigned2:
         deg = self.getDegree(row, col)
         if deg in degrees:
-          if maxdeg > deg:
+          if maxdeg > deg: #don't bother adding var if not in current max list
             degrees[deg].append((row, col))
         else:
           degrees[deg] = [(row, col)] 
         maxdeg = max(degrees.keys()) #get highest degree
-      # print("Max is", maxdeg, "so choosing", degrees[maxdeg][0], "from ", degrees)
       return degrees[maxdeg][0] #if there is yet another tie, just pick the first one idk
    
     
@@ -233,7 +224,6 @@ class Backtracking:
     for (r, c) in neighbors:
       if(self.assignment[r][c] == 0): #if neighbor unassigned, increase degree 
         degree += 1
-    # print("Degree of", row, ",", col, "is", degree, "for", neighbors)
     return degree
 
 
@@ -253,19 +243,16 @@ def main():
       print("Incorrect filepath")
     else:
       domains, assignment = initCSP(root)
-      print("Domains:", domains)
-      print("Assignment:", assignment)
       
       csp = Backtracking(domains, assignment)
-      print("Checking:")
       csp.findSolution() #gives potential solution (runs backtracking)
       
       #check if solution is like....actually good or not. If it's not it means its a failure
-      if not csp.isComplete():
-        print("No solution")
+      if not csp.isSolved:
+        print("No solution :(")
       else:
-        print("Solution:", csp.assignment) #final solution held in the assignment attributes
-        printOutput(csp.assignment)
+        print("Solution:", csp.assignment)
+        printOutput(csp.assignment)  #final solution held in the assignment attribute
   
   
 if __name__ == "__main__":
